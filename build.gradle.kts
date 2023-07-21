@@ -1,12 +1,9 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("org.springframework.boot") version "3.1.2"
     id("io.spring.dependency-management") version "1.1.2"
     //id("org.graalvm.buildtools.native") version "0.9.23"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
     kotlin("jvm") version "1.8.22"
     kotlin("plugin.spring") version "1.8.22"
 }
@@ -75,31 +72,5 @@ sourceSets {
             srcDir("src/main/kotlin")
             exclude("**/*.kt")
         }
-    }
-}
-tasks.withType<Jar> {
-    manifest {
-        attributes["Start-Class"] = "de.tschuehly.viewcomponentlambda.ViewComponentLambdaApplication"
-    }
-}
-
-tasks.assemble {
-    dependsOn("shadowJar")
-}
-
-
-tasks.withType<ShadowJar> {
-    archiveFileName.set("awsLamdaSample.jar")
-    dependencies {
-        exclude("org.springframework.cloud:spring-cloud-function-web")
-    }
-    // Required for Spring
-    mergeServiceFiles()
-    append("META-INF/spring.handlers")
-    append("META-INF/spring.schemas")
-    append("META-INF/spring.tooling")
-    transform(PropertiesFileTransformer::class.java) {
-        paths.add("META-INF/spring.factories")
-        mergeStrategy = "append"
     }
 }
