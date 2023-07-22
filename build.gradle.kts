@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -44,10 +45,11 @@ dependencies {
 
     implementation("de.tschuehly:spring-view-component-thymeleaf:0.6.1-SNAPSHOT")
 
-    api("org.springframework.cloud:spring-cloud-function-web")
-    api("org.springframework.cloud:spring-cloud-function-adapter-aws")
-    api("org.springframework.boot:spring-boot-configuration-processor")
-    api("com.amazonaws:aws-lambda-java-events:3.11.2")
+    implementation("org.springframework.cloud:spring-cloud-function-web")
+    implementation("org.springframework.cloud:spring-cloud-function-adapter-aws")
+    implementation("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("com.amazonaws:aws-lambda-java-events:3.11.2")
+
     compileOnly("com.amazonaws:aws-lambda-java-core:1.2.2")
 
     implementation("org.springframework.cloud:spring-cloud-function-kotlin:3.2.0")
@@ -85,25 +87,27 @@ tasks.assemble {
     dependsOn("shadowJar")
 }
 
-tasks.jar{
+tasks.withType<Jar>{
     manifest{
         attributes["Main-Class"] = "de.tschuehly.viewcomponentlambda.ViewComponentLambdaApplicationKt"
     }
 }
 
 tasks.withType<ShadowJar> {
-    archiveFileName.set("awsLamdaSample.jar")
+    archiveClassifier.set("aws")
     dependencies {
-        exclude("org.springframework.cloud:spring-cloud-function-web")
+        exclude(
+            dependency("org.springframework.cloud:spring-cloud-function-web"))
     }
     // Required for Spring
     mergeServiceFiles()
     append("META-INF/spring.handlers")
     append("META-INF/spring.schemas")
     append("META-INF/spring.tooling")
+    append("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
+    append("META-INF/spring/org.springframework.boot.actuate.autoconfigure.web.ManagementContextConfiguration.imports")
     transform(PropertiesFileTransformer::class.java) {
         paths.add("META-INF/spring.factories")
-        paths.add("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports")
         mergeStrategy = "append"
     }
 }
